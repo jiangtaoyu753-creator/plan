@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="江涛计划">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<title>江涛 · 2026下半年计划</title>
+<style>
+:root {
+  --bg: #0f0f0f;
+  --card: #1a1a1a;
+  --text: #e0e0e0;
+  --secondary: #999;
+  --accent: #ff6b35;
+  --accent2: #4ecdc4;
+  --accent3: #ffe66d;
+  --en: #4ecdc4;
+  --sw: #ff6b35;
+  --rs: #ffe66d;
+  --done: #2a2a2a;
+  --border: #2a2a2a;
+  --danger: #e74c3c;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  padding-bottom: 80px;
+}
+
+/* Header */
+.header {
+  padding: 16px 20px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(15,15,15,0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.header-top {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.header h1 {
+  font-size: 22px; font-weight: 700; letter-spacing: -0.3px;
+}
+.header .date-range {
+  font-size: 12px; color: var(--secondary); margin-top: 2px;
+}
+.progress-mini {
+  display: flex; gap: 6px; margin-top: 10px; align-items: center;
+}
+.progress-mini .bar-wrap {
+  flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+}
+.progress-mini .bar-fill {
+  height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s;
+}
+.progress-mini .pct { font-size: 11px; color: var(--secondary); min-width: 30px; text-align: right; }
+
+/* Week Tabs */
+.week-tabs {
+  display: flex; gap: 6px; padding: 0 20px 8px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.week-tabs::-webkit-scrollbar { display: none; }
+.week-tab {
+  padding: 8px 14px; border-radius: 20px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--secondary); font-size: 13px; white-space: nowrap;
+  cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.week-tab.active {
+  background: var(--accent); border-color: var(--accent);
+  color: #fff; font-weight: 600;
+}
+
+/* Month label */
+.month-label {
+  padding: 16px 20px 6px; font-size: 13px; font-weight: 700;
+  color: var(--accent); letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* Day card */
+.day-card {
+  margin: 8px 16px; padding: 16px;
+  border-radius: 14px; background: var(--card);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+.day-card.today { border-color: var(--accent3); border-width: 1.5px; }
+.day-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.day-name { font-weight: 700; font-size: 15px; }
+.day-date { font-size: 12px; color: var(--secondary); }
+.day-score {
+  font-size: 12px; padding: 3px 8px; border-radius: 10px;
+  background: var(--border); color: var(--secondary);
+}
+.day-score.good { background: #1a3a2a; color: var(--accent2); }
+.day-score.ok { background: #3a2a1a; color: var(--accent); }
+
+/* Task item */
+.track-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  margin-top: 10px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;
+}
+.track-label .dot { width: 6px; height: 6px; border-radius: 3px; }
+.track-en .dot { background: var(--en); }
+.track-sw .dot { background: var(--sw); }
+.track-rs .dot { background: var(--rs); }
+.track-en { color: var(--en); }
+.track-sw { color: var(--sw); }
+.track-rs { color: var(--rs); }
+
+.task {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+  cursor: pointer;
+}
+.task:last-child { border-bottom: none; }
+.task .check {
+  width: 22px; height: 22px; border-radius: 11px;
+  border: 2px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px; transition: all 0.2s;
+}
+.task.done .check {
+  background: var(--accent2); border-color: var(--accent2);
+}
+.task.done .check::after { content: '✓'; font-size: 12px; color: #000; font-weight: 700; }
+.task .text { flex: 1; font-size: 13px; line-height: 1.5; }
+.task.done .text { color: var(--secondary); text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.2); }
+.task .time-badge {
+  font-size: 10px; color: var(--secondary); flex-shrink: 0;
+  padding: 2px 6px; border-radius: 6px; background: var(--border);
+}
+
+/* Bottom nav */
+.nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; background: rgba(26,26,26,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border); z-index: 20;
+}
+.nav-btn {
+  flex: 1; padding: 12px 8px; text-align: center;
+  font-size: 10px; color: var(--secondary); cursor: pointer;
+  transition: color 0.2s;
+}
+.nav-btn.active { color: var(--accent); }
+.nav-btn .icon { font-size: 20px; display: block; margin-bottom: 2px; }
+
+/* Stats tab */
+.stats-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  padding: 16px;
+}
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px; text-align: center;
+}
+.stat-card .num { font-size: 36px; font-weight: 800; letter-spacing: -2px; }
+.stat-card .label { font-size: 11px; color: var(--secondary); margin-top: 4px; }
+
+.streak-section {
+  margin: 0 16px 16px; padding: 16px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+}
+.streak-section h3 { font-size: 14px; margin-bottom: 8px; }
+.streak-dots { display: flex; gap: 4px; flex-wrap: wrap; }
+.streak-dot {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--border); font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.streak-dot.done { background: var(--accent2); color: #000; }
+.streak-dot.miss { background: var(--danger); }
+
+/* Motivation */
+.motivation {
+  margin: 16px; padding: 16px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-radius: 14px; text-align: center; border: 1px solid #2a2a4e;
+}
+.motivation .quote { font-size: 14px; font-style: italic; color: var(--accent3); }
+.motivation .author { font-size: 11px; color: var(--secondary); margin-top: 6px; }
+
+/* Toggle track filter */
+.filter-row {
+  display: flex; gap: 8px; padding: 0 16px 8px; flex-wrap: wrap;
+}
+.filter-chip {
+  padding: 6px 12px; border-radius: 14px; border: 1px solid var(--border);
+  font-size: 11px; color: var(--secondary); cursor: pointer; transition: all 0.2s;
+  background: transparent;
+}
+.filter-chip.on { background: var(--border); color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🎯 江涛·下半年冲刺</h1>
+      <div class="date-range">研一暑假 → 研二上学期 · 2026.07-12</div>
+    </div>
+    <div style="font-size:28px;" id="moodIcon">🔥</div>
+  </div>
+  <div class="progress-mini">
+    <span style="font-size:10px;color:var(--secondary)">本周</span>
+    <div class="bar-wrap"><div class="bar-fill" id="weekBar" style="width:0%"></div></div>
+    <span class="pct" id="weekPct">0%</span>
+  </div>
+  <div class="progress-mini" style="margin-top:4px">
+    <span style="font-size:10px;color:var(--secondary)">总进度</span>
+    <div class="bar-wrap"><div class="bar-fill" id="totalBar" style="width:0%;background:var(--accent2)"></div></div>
+    <span class="pct" id="totalPct">0%</span>
+  </div>
+</div>
+
+<!-- Week selector tabs -->
+<div class="week-tabs" id="weekTabs"></div>
+
+<!-- Filter -->
+<div class="filter-row">
+  <span class="filter-chip on" data-track="all" onclick="toggleFilter('all',this)">全部</span>
+  <span class="filter-chip on" data-track="en" onclick="toggleFilter('en',this)">🇬🇧 英语</span>
+  <span class="filter-chip on" data-track="sw" onclick="toggleFilter('sw',this)">💻 软件</span>
+  <span class="filter-chip on" data-track="rs" onclick="toggleFilter('rs',this)">🔬 课题</span>
+  <span class="filter-chip on" data-track="body" onclick="toggleFilter('body',this)">🏃 身体</span>
+</div>
+
+<!-- Content -->
+<div id="mainContent"></div>
+
+<!-- Bottom nav -->
+<div class="nav">
+  <div class="nav-btn active" data-tab="plan" onclick="switchTab('plan')">
+    <span class="icon">📋</span>每日任务
+  </div>
+  <div class="nav-btn" data-tab="stats" onclick="switchTab('stats')">
+    <span class="icon">📊</span>统计数据
+  </div>
+  <div class="nav-btn" data-tab="review" onclick="switchTab('review')">
+    <span class="icon">🧠</span>防摆烂
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+
+// Generate bi-weekly plan from July to December 2026
+const planData = {};
+
+// Helper to add tasks to a day
+function d(y,m,d,tasks){ const k=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; planData[k]=tasks; }
+
+// === JULY ===
+// Week 1 (Jul 1-5, Wed-Sun) - Start
+const w1 = [
+  {track:'en',text:'安装背单词APP（墨墨/不背单词/百词斩）',time:'10min',id:'j1a'},
+  {track:'en',text:'制定30词/天的背词目标，设手机闹钟提醒',time:'5min',id:'j1b'},
+  {track:'sw',text:'B站搜索"HyperMesh入门教程"，收藏3个备选',time:'15min',id:'j1c'},
+  {track:'sw',text:'安装HyperMesh（找师兄要安装包或淘宝买）',time:'30min',id:'j1d'},
+  {track:'rs',text:'去实验室认领工位，跟师兄打招呼',time:'20min',id:'j1e'},
+  {track:'body',text:'晚上去操场踩点跑步路线，走一圈',time:'15min',id:'j1f'},
+];
+d(2026,7,1,[...w1,{track:'rs',text:'开始读第一篇论文（导师近期发表的优先）',time:'40min',id:'j1g'}]);
+
+const w1d2 = [
+  {track:'en',text:'背30个六级核心词（用APP）',time:'20min',id:'j2a'},
+  {track:'en',text:'听15分钟英文播客（推荐BBC 6 Minute English）',time:'15min',id:'j2b'},
+  {track:'sw',text:'HyperMesh教程第1课：界面认识+文件导入',time:'45min',id:'j2c'},
+  {track:'rs',text:'继续读第1篇论文，做简要笔记（中文即可）',time:'40min',id:'j2d'},
+  {track:'body',text:'第一次跑步：2公里，慢跑不追速度',time:'20min',id:'j2e'},
+];
+d(2026,7,2,w1d2);
+
+const w1d3 = [
+  {track:'en',text:'背30个六级核心词',time:'20min',id:'j3a'},
+  {track:'en',text:'听15分钟英文播客',time:'15min',id:'j3b'},
+  {track:'sw',text:'HyperMesh教程第2课：工具栏+视图操作',time:'45min',id:'j3c'},
+  {track:'rs',text:'完成第1篇论文笔记，一句话总结核心贡献',time:'30min',id:'j3d'},
+  {track:'rs',text:'开始读第2篇论文（选实验室师兄发表的）',time:'30min',id:'j3e'},
+];
+d(2026,7,3,w1d3);
+
+const w1d4 = [
+  {track:'en',text:'背30个六级核心词（复习前3天的词）',time:'25min',id:'j4a'},
+  {track:'en',text:'听15分钟英文播客，尝试跟读2-3句',time:'15min',id:'j4b'},
+  {track:'sw',text:'HyperMesh教程第3课：基础几何操作',time:'45min',id:'j4c'},
+  {track:'rs',text:'继续读第2篇论文',time:'40min',id:'j4d'},
+  {track:'body',text:'第二次跑步：2公里，找到舒服的配速',time:'20min',id:'j4e'},
+];
+d(2026,7,4,w1d4);
+
+// Sunday - relax + plan
+const w1d5 = [
+  {track:'en',text:'复习本周140个单词，标记记不住的加重点',time:'30min',id:'j5a'},
+  {track:'rs',text:'完成第2篇论文笔记',time:'30min',id:'j5b'},
+  {track:'rs',text:'周日复盘：写下这周完成/没完成的事',time:'20min',id:'j5c'},
+  {track:'rs',text:'规划下周具体安排（填到本App）',time:'15min',id:'j5d'},
+];
+d(2026,7,5,w1d5);
+
+// Week 2 (Jul 6-12)
+d(2026,7,6,[
+  {track:'en',text:'背30个六级核心词',time:'20min',id:'j6a'},
+  {track:'en',text:'听15分钟英文播客，尝试复述大意',time:'15min',id:'j6b'},
+  {track:'sw',text:'HyperMesh教程第4课：2D网格划分基础',time:'45min',id:'j6c'},
+  {track:'rs',text:'开始读第3篇论文',time:'40min',id:'j6d'},
+  {track:'body',text:'跑步3公里',time:'22min',id:'j6e'},
+]);
+d(2026,7,7,[
+  {track:'en',text:'背30个六级核心词',time:'20min',id:'j7a'},
+  {track:'en',text:'英文播客+影子跟读（跟读5句）',time:'20min',id:'j7b'},
+  {track:'sw',text:'HyperMesh教程第5课：2D网格质量检查',time:'45min',id:'j7c'},
+  {track:'rs',text:'完成第3篇论文笔记',time:'30min',id:'j7d'},
+]);
+d(2026,7,8,[
+  {track:'en',text:'背30个六级核心词',time:'20min',id:'j8a'},
+  {track:'en',text:'英文播客15min',time:'15min',id:'j8b'},
+  {track:'sw',text:'HyperMesh教程第6课：3D网格基础',time:'45min',id:'j8c'},
+  {track:'rs',text:'开始读第4篇论文',time:'40min',id:'j8d'},
+  {track:'body',text:'跑步3公里',time:'22min',id:'j8e'},
+]);
+d(2026,7,9,[
+  {track:'en',text:'背30个六级核心词+复习前3天',time:'25min',id:'j9a'},
+  {track:'en',text:'跟读练习：找1个汽车安全英文视频跟读',time:'20min',id:'j9b'},
+  {track:'sw',text:'HyperMesh教程第7课：边界条件设置',time:'45min',id:'j9c'},
+  {track:'rs',text:'完成第4篇论文笔记',time:'30min',id:'j9d'},
+]);
+d(2026,7,10,[
+  {track:'en',text:'背30个六级核心词',time:'20min',id:'j10a'},
+  {track:'en',text:'英文播客15min',time:'15min',id:'j10b'},
+  {track:'sw',text:'HyperMesh教程第8课：简单求解案例',time:'50min',id:'j10c'},
+  {track:'rs',text:'回顾4篇论文，尝试总结共性和gap',time:'40min',id:'j10d'},
+  {track:'body',text:'跑步3公里',time:'22min',id:'j10e'},
+]);
+d(2026,7,11,[
+  {track:'en',text:'背30个六级核心词',time:'20min',id:'j11a'},
+  {track:'en',text:'跟读练习：模仿一段英文技术报告',time:'20min',id:'j11b'},
+  {track:'sw',text:'复习HyperMesh前8课，独立做一次网格划分',time:'60min',id:'j11c'},
+  {track:'rs',text:'整理4篇论文的对比表（方法/数据/结论）',time:'50min',id:'j11d'},
+]);
+d(2026,7,12,[
+  {track:'en',text:'复习本周210个单词',time:'30min',id:'j12a'},
+  {track:'sw',text:'HyperMesh自由练习：试着画一个简单零件',time:'45min',id:'j12b'},
+  {track:'rs',text:'周日复盘+下周计划',time:'30min',id:'j12c'},
+  {track:'rs',text:'整理候选研究方向清单（3个方向）',time:'40min',id:'j12d'},
+]);
+
+// Week 3 (Jul 13-19)
+const w3tasks = [
+  {track:'en',text:'背30个六级核心词',time:'20min'},
+  {track:'en',text:'英文播客+影子跟读',time:'20min'},
+  {track:'sw',text:'HyperMesh进阶练习',time:'45min'},
+  {track:'rs',text:'精读1篇论文',time:'40min'},
+];
+for(let i=13;i<=18;i++){
+  const tasks = [...w3tasks];
+  if(i%2===0) tasks.push({track:'body',text:`跑步3-4公里`,time:'25min'});
+  d(2026,7,i,tasks.map((t,j)=>({...t,id:`j${i}_${j}`})));
+}
+d(2026,7,19,[
+  {track:'en',text:'复习本周词汇',time:'30min',id:'j19a'},
+  {track:'sw',text:'HyperMesh自由练习',time:'45min',id:'j19b'},
+  {track:'rs',text:'周日复盘+下周计划',time:'30min',id:'j19c'},
+  {track:'rs',text:'尝试写3个候选方向的一句话描述',time:'40min',id:'j19d'},
+]);
+
+// Week 4 (Jul 20-26)
+for(let i=20;i<=25;i++){
+  const tasks = [
+    {track:'en',text:'背30个六级核心词',time:'20min'},
+    {track:'en',text:'英文播客+跟读（目标：流利跟读5句）',time:'20min'},
+    {track:'sw',text:'HyperMesh案例练习：复现论文网格',time:'50min'},
+    {track:'rs',text:'精读1篇论文+笔记',time:'40min'},
+  ];
+  if(i%2===0) tasks.push({track:'body',text:'跑步4公里',time:'28min'});
+  d(2026,7,i,tasks.map((t,j)=>({...t,id:`j${i}_${j}`})));
+}
+d(2026,7,26,[
+  {track:'en',text:'复习本周词汇',time:'30min',id:'j26a'},
+  {track:'sw',text:'HyperMesh独立完成一个简单仿真',time:'60min',id:'j26b'},
+  {track:'rs',text:'周日复盘+7月总结',time:'30min',id:'j26c'},
+  {track:'rs',text:'确定3个候选方向，准备找导师汇报',time:'50min',id:'j26d'},
+]);
+
+// Week 5 (Jul 27-31) - end of July
+for(let i=27;i<=30;i++){
+  d(2026,7,i,[
+    {track:'en',text:'背30个六级核心词',time:'20min',id:`j${i}a`},
+    {track:'en',text:'英文播客+跟读',time:'20min',id:`j${i}b`},
+    {track:'sw',text:'HyperMesh熟练度练习',time:'45min',id:`j${i}c`},
+    {track:'rs',text:'准备向导师汇报的材料（PPT或文档）',time:'50min',id:`j${i}d`},
+    {track:'body',text:i%2===0?'跑步4公里':'休息',time:i%2===0?'28min':'—',id:`j${i}e`},
+  ]);
+}
+d(2026,7,31,[
+  {track:'en',text:'7月词汇总复习',time:'30min',id:'j31a'},
+  {track:'sw',text:'HyperMesh月度回顾：录一段自己的操作视频',time:'45min',id:'j31b'},
+  {track:'rs',text:'7月复盘+8月计划',time:'30min',id:'j31c'},
+  {track:'sw',text:'奖励：跟发小开黑（限3小时）',time:'—',id:'j31d'},
+]);
+
+// === AUGUST (skeleton) ===
+for(let i=1;i<=31;i++){
+  const isWeekend = (i%7===0)||(i%7===1); // rough
+  const base = [
+    {track:'en',text:'背30个六级核心词',time:'20min',id:`a${i}a`},
+    {track:'en',text:i%3===0?'CET-6真题（一套，计时）':'英文播客+跟读',time:i%3===0?'140min':'20min',id:`a${i}b`},
+    {track:'sw',text:i<=10?'HyperMesh进阶：边界条件+接触':'MADYMO入门教程',time:'50min',id:`a${i}c`},
+    {track:'rs',text:i<=15?'继续精读文献，聚焦方向':'确定方向，开始实验/仿真准备',time:'40min',id:`a${i}d`},
+  ];
+  if(i%2===0) base.push({track:'body',text:'跑步4-5公里',time:'30min',id:`a${i}e`});
+  if(isWeekend) base.push({track:'en',text:'复习本周词汇',time:'30min',id:`a${i}f`});
+  d(2026,8,i,base);
+}
+
+// === SEPTEMBER ===
+for(let i=1;i<=30;i++){
+  const base = [
+    {track:'en',text:'背30个六级核心词',time:'20min',id:`s${i}a`},
+    {track:'en',text:i%3===0?'CET-6真题一套':'跟读+口语练习',time:i%3===0?'140min':'25min',id:`s${i}b`},
+    {track:'sw',text:i<=15?'HyperMesh保持+MADYMO继续':'MADYMO进阶+Primer简介',time:'50min',id:`s${i}c`},
+    {track:'rs',text:'课题实验/仿真持续推进',time:'50min',id:`s${i}d`},
+  ];
+  if(i%2===0) base.push({track:'body',text:'跑步4-5公里',time:'28min',id:`s${i}e`});
+  d(2026,9,i,base);
+}
+
+// === OCTOBER ===
+for(let i=1;i<=31;i++){
+  const base = [
+    {track:'en',text:'背30个六级核心词',time:'20min',id:`o${i}a`},
+    {track:'en',text:i%2===0?'CET-6真题（严格计时）':'听力专项练习30min',time:'45min',id:`o${i}b`},
+    {track:'sw',text:'两款软件交替练习',time:'50min',id:`o${i}c`},
+    {track:'rs',text:'课题推进+准备组会汇报',time:'50min',id:`o${i}d`},
+  ];
+  if(i%3===0) base.push({track:'body',text:'跑步5公里',time:'30min',id:`o${i}e`});
+  d(2026,10,i,base);
+}
+
+// === NOVEMBER ===
+for(let i=1;i<=30;i++){
+  const base = [
+    {track:'en',text:'CET-6全真模拟一套（每日轮换板块）',time:'90min',id:`n${i}a`},
+    {track:'en',text:'写作模板背诵+翻译练习',time:'40min',id:`n${i}b`},
+    {track:'sw',text:'每周2小时保持',time:'25min',id:`n${i}c`},
+    {track:'rs',text:'课题保持推进',time:'30min',id:`n${i}d`},
+  ];
+  if(i%3===0) base.push({track:'body',text:'跑步3公里（备考期减量）',time:'20min',id:`n${i}e`});
+  d(2026,11,i,base);
+}
+
+// === DECEMBER ===
+for(let i=1;i<=31;i++){
+  const isBeforeExam = i<=13;
+  const base = isBeforeExam ? [
+    {track:'en',text:'CET-6最后冲刺：错题复盘+轻量复习',time:'60min',id:`d${i}a`},
+    {track:'sw',text:'恢复练习：每周3次',time:'40min',id:`d${i}b`},
+    {track:'rs',text:'课题加速推进',time:'50min',id:`d${i}c`},
+  ] : [
+    {track:'en',text:'英语口语日常保持',time:'20min',id:`d${i}a`},
+    {track:'sw',text:'HyperMesh仿真小项目',time:'60min',id:`d${i}b`},
+    {track:'rs',text:'课题年终冲刺',time:'60min',id:`d${i}c`},
+  ];
+  d(2026,12,i,base);
+}
+
+// ============ STATE ============
+const STORAGE_KEY = 'yjt_plan_2026';
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"checks":{},"currentTab":"plan","currentWeek":0,"filters":["all","en","sw","rs","body"]}');
+if(!state.filters) state.filters = ['all','en','sw','rs','body'];
+
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+// ============ HELPERS ============
+function getDateStr(y,m,d){ return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+function getDayOfWeek(y,m,d){ const dt=new Date(y,m-1,d); return ['日','一','二','三','四','五','六'][dt.getDay()]; }
+function isToday(y,m,d){
+  const now=new Date(); return now.getFullYear()===y && (now.getMonth()+1)===m && now.getDate()===d;
+}
+const now = new Date();
+const todayStr = getDateStr(now.getFullYear(), now.getMonth()+1, now.getDate());
+
+// Generate week ranges
+function getWeekRanges(){
+  const weeks = [];
+  let currentWeek = [];
+  for(let m=7;m<=12;m++){
+    const maxDay = m===9||m===11?30:31;
+    for(let d=1;d<=maxDay;d++){
+      const dow = getDayOfWeek(2026,m,d);
+      currentWeek.push({y:2026,m,d,dow});
+      if(dow==='日' || d===maxDay){
+        weeks.push([...currentWeek]);
+        currentWeek = [];
+      }
+    }
+  }
+  if(currentWeek.length) weeks.push(currentWeek);
+  return weeks;
+}
+
+const weeks = getWeekRanges();
+
+// ============ RENDER ============
+function renderWeekTabs(){
+  const container = document.getElementById('weekTabs');
+  container.innerHTML = weeks.map((w,i) => {
+    const start = w[0]; const end = w[w.length-1];
+    const label = `${start.m}/${start.d}-${end.m}/${end.d}`;
+    const isActive = i===state.currentWeek;
+    const isCurWeek = w.some(day=>isToday(day.y,day.m,day.d));
+    return `<div class="week-tab ${isActive?'active':''} ${isCurWeek&&!isActive?'':''}"
+      onclick="goToWeek(${i})" style="${isCurWeek&&!isActive?'border-color:var(--accent3);color:var(--accent3);':''}">
+      ${label}${isCurWeek?' 📍':''}</div>`;
+  }).join('');
+}
+
+function shouldShow(track){
+  if(state.filters.includes('all')) return true;
+  return state.filters.includes(track);
+}
+
+function renderPlan(){
+  const container = document.getElementById('mainContent');
+  const week = weeks[state.currentWeek];
+  if(!week) { container.innerHTML='<div style="padding:20px">暂无数据</div>'; return; }
+
+  let html = '';
+  let curMonth = 0;
+
+  week.forEach(day => {
+    if(day.m !== curMonth){
+      curMonth = day.m;
+      const monthNames = ['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+      html += `<div class="month-label">📅 ${monthNames[day.m]}</div>`;
+    }
+
+    const key = getDateStr(day.y, day.m, day.d);
+    const tasks = planData[key] || [];
+    const todayFlag = isToday(day.y, day.m, day.d);
+
+    // Count done tasks
+    const doneCount = tasks.filter(t => state.checks[t.id]).length;
+    const totalCount = tasks.length;
+    const scoreClass = totalCount===0?'':(doneCount===totalCount?'good':(doneCount>=totalCount/2?'ok':''));
+
+    html += `<div class="day-card ${todayFlag?'today':''}">`;
+    html += `<div class="day-header">
+      <div>
+        <span class="day-name">${day.m}月${day.d}日 周${day.dow}</span>
+        ${todayFlag?' <span style="font-size:11px;color:var(--accent3);font-weight:700;">今天</span>':''}
+      </div>
+      <span class="day-score ${scoreClass}">${totalCount>0?doneCount+'/'+totalCount:'休'}</span>
+    </div>`;
+
+    // Group by track
+    const tracks = {en:[],sw:[],rs:[],body:[],other:[]};
+    tasks.forEach(t => {
+      if(tracks[t.track]) tracks[t.track].push(t);
+      else tracks.other.push(t);
+    });
+
+    const trackNames = {en:['🇬🇧 英语','en','track-en'],sw:['💻 软件','sw','track-sw'],rs:['🔬 课题','rs','track-rs'],body:['🏃 身体','body','track-en'],other:['📌 其他','other','track-en']};
+
+    Object.entries(tracks).forEach(([track,ts]) => {
+      if(ts.length===0) return;
+      if(!shouldShow(track) && track!=='other') return;
+      const [label, tk, cls] = trackNames[track];
+      html += `<div class="track-label ${cls}"><span class="dot"></span>${label}</div>`;
+      ts.forEach(t => {
+        const done = !!state.checks[t.id];
+        html += `<div class="task ${done?'done':''}" onclick="toggleTask('${t.id}')">
+          <div class="check"></div>
+          <div class="text">${t.text}</div>
+          ${t.time&&t.time!=='—'?`<div class="time-badge">${t.time}</div>`:''}
+        </div>`;
+      });
+    });
+
+    if(tasks.length===0){
+      html += `<div style="font-size:12px;color:var(--secondary);padding:4px 0">这天暂无安排（休息或补进度）</div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+  updateProgress();
+}
+
+function renderStats(){
+  const container = document.getElementById('mainContent');
+
+  // Count all tasks
+  let totalTasks = 0, doneTasks = 0;
+  let tasksByMonth = {};
+  let trackCounts = {en:0,sw:0,rs:0,body:0};
+  let trackDones = {en:0,sw:0,rs:0,body:0};
+
+  Object.entries(planData).forEach(([key, tasks]) => {
+    const m = parseInt(key.split('-')[1]);
+    if(!tasksByMonth[m]) tasksByMonth[m] = {total:0,done:0};
+    tasks.forEach(t => {
+      totalTasks++;
+      tasksByMonth[m].total++;
+      if(trackCounts[t.track]) trackCounts[t.track]++;
+      if(state.checks[t.id]) {
+        doneTasks++;
+        tasksByMonth[m].done++;
+        if(trackDones[t.track]) trackDones[t.track]++;
+      }
+    });
+  });
+
+  const pct = totalTasks>0?Math.round(doneTasks/totalTasks*100):0;
+
+  // Streak of days with at least 1 task done
+  let streak = 0; let bestStreak = 0;
+  const todayD = new Date();
+  for(let i=0;i<180;i++){
+    const d = new Date(todayD);
+    d.setDate(d.getDate()-i);
+    const k = getDateStr(d.getFullYear(), d.getMonth()+1, d.getDate());
+    const tasks = planData[k];
+    if(!tasks || tasks.length===0) continue;
+    const done = tasks.filter(t=>state.checks[t.id]).length;
+    if(done>0 && done===tasks.length) streak++;
+    else if(done>0 && i===0) streak=1;
+    else break;
+  }
+  // calc best streak
+  let bs=0;
+  for(let i=179;i>=0;i--){
+    const d = new Date(2026,6,1);
+    d.setDate(d.getDate()+i);
+    if(d>todayD) continue;
+    const k = getDateStr(d.getFullYear(), d.getMonth()+1, d.getDate());
+    const tasks = planData[k];
+    if(!tasks || tasks.length===0){ bs=0; continue; }
+    const done = tasks.filter(t=>state.checks[t.id]).length;
+    if(done===tasks.length && tasks.length>0) bs++;
+    else { if(bs>bestStreak) bestStreak=bs; bs=0; }
+  }
+  bestStreak = Math.max(bestStreak, streak);
+
+  // 30-day dots
+  let dotsHtml = '';
+  for(let i=29;i>=0;i--){
+    const d = new Date(todayD);
+    d.setDate(d.getDate()-i);
+    const k = getDateStr(d.getFullYear(), d.getMonth()+1, d.getDate());
+    const tasks = planData[k];
+    if(!tasks || tasks.length===0){ dotsHtml+='<div class="streak-dot"></div>'; continue; }
+    const done = tasks.filter(t=>state.checks[t.id]).length;
+    const allDone = done===tasks.length;
+    const someDone = done>0 && !allDone;
+    dotsHtml += `<div class="streak-dot ${allDone?'done':(someDone?'miss':'')}"
+      title="${k}: ${done}/${tasks.length}">${tasks.length>0?(allDone?'✓':(someDone?'◐':'')):''}</div>`;
+  }
+
+  const monthNames = ['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  let monthHtml = '';
+  for(let m=7;m<=12;m++){
+    const data = tasksByMonth[m] || {total:0,done:0};
+    const mpct = data.total>0?Math.round(data.done/data.total*100):0;
+    monthHtml += `
+      <div class="stat-card">
+        <div class="num" style="font-size:24px">${mpct}%</div>
+        <div class="label">${monthNames[m]} (${data.done}/${data.total})</div>
+      </div>`;
+  }
+
+  container.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="num" style="color:var(--accent2)">${pct}%</div>
+        <div class="label">总完成率 (${doneTasks}/${totalTasks})</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" style="color:var(--accent3)">${streak}</div>
+        <div class="label">当前连续全勤天数</div>
+      </div>
+    </div>
+
+    <div class="streak-section">
+      <h3>📅 近30日打卡</h3>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--secondary);margin-bottom:6px">
+        <span>30天前</span><span>今天</span></div>
+      <div class="streak-dots">${dotsHtml}</div>
+      <div style="display:flex;gap:12px;margin-top:8px;font-size:10px;color:var(--secondary)">
+        <span>🟢 全勤</span><span>🟠 部分</span><span>⬜ 无数据</span>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      ${monthHtml}
+    </div>
+
+    <div class="stats-grid" style="margin-top:0">
+      ${['en','sw','rs','body'].map(tk=>{
+        const names={en:'🇬🇧 英语',sw:'💻 软件',rs:'🔬 课题',body:'🏃 身体'};
+        const p = trackCounts[tk]>0?Math.round(trackDones[tk]/trackCounts[tk]*100):0;
+        return `<div class="stat-card">
+          <div class="num" style="font-size:24px">${p}%</div>
+          <div class="label">${names[tk]} (${trackDones[tk]}/${trackCounts[tk]})</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderReview(){
+  const container = document.getElementById('mainContent');
+  container.innerHTML = `
+    <div class="motivation">
+      <div class="quote">"计划周期太长就会摆烂——所以我把你的路拆成了每14天一个台阶。你只需要看脚下的这一步。"</div>
+    </div>
+
+    <div style="padding:16px">
+      <div class="day-card" style="border-left: 3px solid var(--danger)">
+        <h3 style="font-size:15px;margin-bottom:8px">🚨 连续3天空白警报</h3>
+        <p style="font-size:13px;color:var(--secondary);line-height:1.8">
+          如果你连续3天一个任务都没打勾，<b style="color:var(--accent3)">立刻约一个师兄/同学吃饭</b>，让他们问你这几天在干嘛。外部压力是你的启动开关。
+        </p>
+      </div>
+
+      <div class="day-card" style="border-left:3px solid var(--accent2);margin-top:12px">
+        <h3 style="font-size:15px;margin-bottom:8px">💡 最小自救动作</h3>
+        <p style="font-size:13px;color:var(--secondary);line-height:1.8">
+          状态极差的一天，允许自己只做<b style="color:var(--accent2)">一件事</b>：背15个单词，或者看1篇论文摘要，或者跑1公里。做完就算今天没白过。通常做完第一件事，第二件也会跟上。
+        </p>
+      </div>
+
+      <div class="day-card" style="border-left:3px solid var(--accent3);margin-top:12px">
+        <h3 style="font-size:15px;margin-bottom:8px">⚓ 不可跳过的锚点</h3>
+        <p style="font-size:13px;color:var(--secondary);line-height:1.8">
+          <b style="color:var(--accent3)">每周日晚上的30分钟复盘</b>，是这个系统唯一不可妥协的底线。哪怕这周什么都没做，也要诚实面对——然后重新开始。
+        </p>
+      </div>
+
+      <div class="day-card" style="border-left:3px solid var(--accent);margin-top:12px">
+        <h3 style="font-size:15px;margin-bottom:8px">🎯 你的三大硬目标</h3>
+        <p style="font-size:13px;color:var(--secondary);line-height:2">
+          1️⃣ <b>12月CET-6：必须过</b>（底线425，冲500+）<br>
+          2️⃣ <b>年底软件水平：HyperMesh熟练 + MADYMO入门</b><br>
+          3️⃣ <b>课题进度：方向确定，进度过50%，组会有东西讲</b>
+        </p>
+      </div>
+
+      <div class="day-card" style="border-left:3px solid var(--en);margin-top:12px">
+        <h3 style="font-size:15px;margin-bottom:8px">🏆 你已有的武器</h3>
+        <p style="font-size:13px;color:var(--secondary);line-height:2">
+          ✅ 沟通能力强（面试时这是优势）<br>
+          ✅ 有短周期爆发力（高考520分逆袭就是证明）<br>
+          ✅ 师兄热心（有不懂就问，别自己死磕）<br>
+          ✅ 务实不挑活（愿意加班出差，企业喜欢这样的人）<br>
+          ✅ 汽车安全是法规刚需赛道（不会消失）
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+function updateProgress(){
+  // Current week progress
+  const week = weeks[state.currentWeek];
+  if(!week) return;
+  let weekTotal=0, weekDone=0;
+  week.forEach(day=>{
+    const k = getDateStr(day.y, day.m, day.d);
+    const tasks = planData[k]||[];
+    tasks.forEach(t=>{ weekTotal++; if(state.checks[t.id]) weekDone++; });
+  });
+  const weekPct = weekTotal>0?Math.round(weekDone/weekTotal*100):0;
+  document.getElementById('weekBar').style.width = weekPct+'%';
+  document.getElementById('weekPct').textContent = weekPct+'%';
+
+  // Total progress
+  let allTotal=0, allDone=0;
+  Object.values(planData).forEach(tasks=>{
+    tasks.forEach(t=>{ allTotal++; if(state.checks[t.id]) allDone++; });
+  });
+  const totalPct = allTotal>0?Math.round(allDone/allTotal*100):0;
+  document.getElementById('totalBar').style.width = totalPct+'%';
+  document.getElementById('totalPct').textContent = totalPct+'%';
+
+  // Mood icon
+  const icon = document.getElementById('moodIcon');
+  if(totalPct>=80) icon.textContent='🚀';
+  else if(totalPct>=50) icon.textContent='💪';
+  else if(totalPct>=20) icon.textContent='🔥';
+  else icon.textContent='🐣';
+}
+
+function toggleTask(id){
+  state.checks[id] = !state.checks[id];
+  save();
+  if(state.currentTab==='plan') renderPlan();
+  else if(state.currentTab==='stats') renderStats();
+  updateProgress();
+}
+
+function goToWeek(i){ state.currentWeek=i; save(); renderWeekTabs(); if(state.currentTab==='plan') renderPlan(); }
+
+function switchTab(tab){
+  state.currentTab = tab;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+  if(tab==='plan') renderPlan();
+  else if(tab==='stats') renderStats();
+  else if(tab==='review') renderReview();
+  save();
+}
+
+function toggleFilter(track, el){
+  if(track==='all'){
+    if(state.filters.includes('all')){
+      state.filters = [];
+    } else {
+      state.filters = ['all'];
+    }
+  } else {
+    if(state.filters.includes('all')){
+      state.filters = state.filters.filter(f=>f!=='all');
+      state.filters.push(track);
+    } else if(state.filters.includes(track)){
+      state.filters = state.filters.filter(f=>f!==track);
+      // Don't let all be empty
+      if(state.filters.length===0) state.filters=['all'];
+    } else {
+      state.filters.push(track);
+    }
+  }
+
+  // Update chip visuals
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    const dt = chip.dataset.track;
+    chip.classList.toggle('on', state.filters.includes(dt));
+  });
+
+  save();
+  if(state.currentTab==='plan') renderPlan();
+}
+
+// Initialize
+function init(){
+  // Find current week
+  let curWeekIdx = 0;
+  weeks.forEach((w,i) => {
+    if(w.some(day=>isToday(day.y,day.m,day.d))) curWeekIdx = i;
+  });
+  if(state.currentWeek===0 && curWeekIdx>0) state.currentWeek = curWeekIdx;
+
+  renderWeekTabs();
+
+  if(state.currentTab==='plan') renderPlan();
+  else if(state.currentTab==='stats') renderStats();
+  else if(state.currentTab==='review') renderReview();
+
+  // Restore filter chip visuals
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.classList.toggle('on', state.filters.includes(chip.dataset.track));
+  });
+
+  // Highlight correct nav
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===state.currentTab));
+
+  updateProgress();
+}
+
+init();
+</script>
+</body>
+</html>
