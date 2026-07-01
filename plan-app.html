@@ -1007,6 +1007,13 @@ function renderStats(){
       </div>`;
   }
 
+  // 备忘录统计
+  let totalMemosAll = 0, doneMemosAll = 0;
+  Object.values(state.memos).forEach(ms => {
+    ms.forEach(m => { totalMemosAll++; if (m.done) doneMemosAll++; });
+  });
+  const memoPct = totalMemosAll > 0 ? Math.round(doneMemosAll / totalMemosAll * 100) : 0;
+
   container.innerHTML = `
     <div class="stats-grid">
       <div class="stat-card">
@@ -1042,6 +1049,23 @@ function renderStats(){
           <div class="label">${names[tk]} (${trackDones[tk]}/${trackCounts[tk]})</div>
         </div>`;
       }).join('')}
+    </div>
+
+    <div class="stat-card" style="grid-column: 1 / -1; border-left: 3px solid var(--accent-purple);">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="text-align:left">
+          <div class="label">📝 备忘录</div>
+          <div class="num" style="font-size:24px;color:var(--accent-purple)">${totalMemosAll} 条</div>
+        </div>
+        <div style="text-align:right">
+          <div class="label">完成率</div>
+          <div class="num" style="font-size:24px;color:var(--accent-green)">${memoPct}%</div>
+        </div>
+        <div style="text-align:right">
+          <div class="label">已完成</div>
+          <div class="num" style="font-size:24px;color:var(--text)">${doneMemosAll}/${totalMemosAll}</div>
+        </div>
+      </div>
     </div>
   `;
 }
