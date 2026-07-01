@@ -624,10 +624,56 @@ for(let i=1;i<=31;i++){
 
 // ============ STATE ============
 const STORAGE_KEY = 'yjt_plan_2026';
-let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"checks":{},"currentTab":"plan","currentWeek":0,"filters":["all","en","sw","rs","body"]}');
-if(!state.filters) state.filters = ['all','en','sw','rs','body'];
+let rawState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"checks":{},"currentTab":"plan","currentWeek":0,"filters":["all","en","sw","rs","body"]}');
+// 向后兼容：确保 memos 字段存在
+if (!rawState.memos) rawState.memos = {};
+let state = rawState;
 
 function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+// 生成唯一 memo ID
+function genMemoId() {
+  return 'memo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+}
+
+function getTodayStr() {
+  const now = new Date();
+  return getDateStr(now.getFullYear(), now.getMonth()+1, now.getDate());
+}
+
+function addMemo(dateStr, text) {
+  if (!text || !text.trim()) return null;
+  if (!state.memos[dateStr]) state.memos[dateStr] = [];
+  const memo = {
+    id: genMemoId(),
+    text: text.trim(),
+    done: false,
+    createdAt: new Date().toISOString()
+  };
+  state.memos[dateStr].push(memo);
+  save();
+  return memo;
+}
+
+function toggleMemo(dateStr, memoId) {
+  const memos = state.memos[dateStr];
+  if (!memos) return;
+  const memo = memos.find(m => m.id === memoId);
+  if (memo) { memo.done = !memo.done; save(); }
+}
+
+function deleteMemo(dateStr, memoId) {
+  if (!state.memos[dateStr]) return;
+  state.memos[dateStr] = state.memos[dateStr].filter(m => m.id !== memoId);
+  if (state.memos[dateStr].length === 0) delete state.memos[dateStr];
+  save();
+}
+
+function editMemo(dateStr, memoId, newText) {
+  if (!newText || !newText.trim()) { deleteMemo(dateStr, memoId); return; }
+  const memo = state.memos[dateStr].find(m => m.id === memoId);
+  if (memo) { memo.text = newText.trim(); save(); }
+}
 
 // ============ HELPERS ============
 function getDateStr(y,m,d){ return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
