@@ -393,6 +393,15 @@ body {
   font-family: inherit; transition: border-color 0.2s;
 }
 .memo-input:focus { border-color: var(--accent-purple); }
+
+/* Tab transition animation */
+#mainContent {
+  animation: fadeSlideIn 0.3s ease;
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
 </head>
 <body>
@@ -757,7 +766,10 @@ function showMemoInput(addBtn, dateStr) {
   const input = inputDiv.querySelector('input');
   input.focus();
 
+  let committed = false;
   function commit() {
+    if (committed) return;
+    committed = true;
     const text = input.value;
     inputDiv.remove();
     if (text.trim()) {
@@ -767,7 +779,7 @@ function showMemoInput(addBtn, dateStr) {
     }
   }
   input.addEventListener('keydown', e => { if (e.key === 'Enter') commit(); });
-  input.addEventListener('blur', commit);
+  input.addEventListener('blur', () => setTimeout(commit, 100));
 }
 
 function startEditMemo(dateStr, memoId, textEl) {
