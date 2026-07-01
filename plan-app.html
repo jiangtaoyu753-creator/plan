@@ -834,6 +834,37 @@ function renderWeekTabs(){
   }).join('');
 }
 
+function renderSidebarWeeks() {
+  const container = document.getElementById('sidebarWeeks');
+  if (!container) return;
+  container.innerHTML = weeks.map((w,i) => {
+    const start = w[0]; const end = w[w.length-1];
+    const label = `${start.m}/${start.d}-${end.m}/${end.d}`;
+    const isActive = i === state.currentWeek;
+    const isCurWeek = w.some(day => isToday(day.y, day.m, day.d));
+    return `<div class="week-tab ${isActive?'active':''}"
+      style="${isCurWeek && !isActive ? 'border-color:var(--accent);color:var(--accent);' : ''}"
+      onclick="goToWeek(${i})">
+      ${label}${isCurWeek?' 📍':''}</div>`;
+  }).join('');
+}
+
+function renderSidebarFilters() {
+  const container = document.getElementById('sidebarFilters');
+  if (!container) return;
+  const filters = [
+    { track: 'all', label: '📌 全部' },
+    { track: 'en', label: '🇬🇧 英语' },
+    { track: 'sw', label: '💻 软件' },
+    { track: 'rs', label: '🔬 课题' },
+    { track: 'body', label: '🏃 身体' },
+  ];
+  container.innerHTML = filters.map(f => {
+    return `<div class="filter-chip ${state.filters.includes(f.track) ? 'on' : ''}"
+      data-track="${f.track}" onclick="toggleFilter('${f.track}', this)">${f.label}</div>`;
+  }).join('');
+}
+
 function shouldShow(track){
   if(state.filters.includes('all')) return true;
   return state.filters.includes(track);
@@ -1285,7 +1316,12 @@ function toggleTask(id){
   updateProgress();
 }
 
-function goToWeek(i){ state.currentWeek=i; save(); renderWeekTabs(); if(state.currentTab==='plan') renderPlan(); }
+function goToWeek(i) {
+  state.currentWeek = i; save();
+  renderWeekTabs();
+  renderSidebarWeeks();
+  if (state.currentTab === 'plan') renderPlan();
+}
 
 function switchTab(tab){
   state.currentTab = tab;
@@ -1327,6 +1363,7 @@ function toggleFilter(track, el){
 
   save();
   if(state.currentTab==='plan') renderPlan();
+  renderSidebarFilters();
 }
 
 // Initialize
@@ -1354,6 +1391,10 @@ function init(){
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===state.currentTab));
 
   updateProgress();
+  renderSidebarWeeks();
+  renderSidebarFilters();
+  // 初始化侧栏导航高亮
+  document.querySelectorAll('#sidebarNav .nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === state.currentTab));
 }
 
 init();
