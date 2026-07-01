@@ -28,7 +28,6 @@
   --accent: #007aff;
   --accent-green: #34c759;
   --accent-orange: #ff9500;
-  --accent-yellow: #ff9f0a;
   --accent-pink: #ff375f;
   --accent-purple: #af52de;
 
@@ -154,6 +153,8 @@ body {
 .track-en { color: var(--en); }
 .track-sw { color: var(--sw); }
 .track-rs { color: var(--rs); }
+.track-body { color: var(--accent-pink); }
+.track-body .dot { background: var(--accent-pink); }
 
 /* Task item */
 .task {
@@ -394,14 +395,8 @@ body {
 }
 .memo-input:focus { border-color: var(--accent-purple); }
 
-/* Tab transition animation */
-#mainContent {
-  animation: fadeSlideIn 0.3s ease;
-}
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.memo-search::placeholder { color: var(--text-tertiary); }
+
 </style>
 </head>
 <body>
@@ -712,11 +707,6 @@ function genMemoId() {
   return 'memo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
 }
 
-function getTodayStr() {
-  const now = new Date();
-  return getDateStr(now.getFullYear(), now.getMonth()+1, now.getDate());
-}
-
 function addMemo(dateStr, text) {
   if (!text || !text.trim()) return null;
   if (!state.memos[dateStr]) state.memos[dateStr] = [];
@@ -922,7 +912,7 @@ function renderPlan(){
       else tracks.other.push(t);
     });
 
-    const trackNames = {en:['🇬🇧 英语','en','track-en'],sw:['💻 软件','sw','track-sw'],rs:['🔬 课题','rs','track-rs'],body:['🏃 身体','body','track-en'],other:['📌 其他','other','track-en']};
+    const trackNames = {en:['🇬🇧 英语','en','track-en'],sw:['💻 软件','sw','track-sw'],rs:['🔬 课题','rs','track-rs'],body:['🏃 身体','body','track-body'],other:['📌 其他','other','track-en']};
 
     Object.entries(tracks).forEach(([track,ts]) => {
       if(ts.length===0) return;
@@ -1345,6 +1335,14 @@ function switchTab(tab){
   else if(tab==='stats') renderStats();
   else if(tab==='review') renderReview();
   save();
+  // Tab transition animation
+  const mc = document.getElementById('mainContent');
+  if (mc) {
+    mc.animate([
+      { opacity: 0, transform: 'translateY(6px)' },
+      { opacity: 1, transform: 'translateY(0)' }
+    ], { duration: 300, easing: 'ease' });
+  }
 }
 
 function toggleFilter(track, el){
