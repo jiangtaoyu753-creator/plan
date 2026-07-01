@@ -244,6 +244,91 @@ body {
 }
 .motivation .quote { font-size: 14px; font-style: italic; color: var(--accent-purple); }
 .motivation .author { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
+/* ===== 桌面端布局 (≥768px) ===== */
+@media (min-width: 768px) {
+  body { padding-bottom: 0; }
+
+  .app-layout {
+    display: flex; min-height: calc(100vh - 100px);
+    max-width: 1400px; margin: 0 auto; padding: 0 16px;
+  }
+
+  .sidebar {
+    width: 240px; flex-shrink: 0;
+    position: sticky; top: 100px; align-self: flex-start;
+    height: calc(100vh - 116px);
+    overflow-y: auto; overflow-x: hidden;
+    padding-right: 8px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .sidebar-nav {
+    display: flex; flex-direction: column; gap: 2px;
+    background: var(--card); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
+    padding: 6px; overflow: hidden;
+  }
+  .sidebar-nav .nav-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; text-align: left; font-size: 14px;
+    border-radius: var(--radius-sm); font-weight: 500;
+    flex: none;
+  }
+  .sidebar-nav .nav-btn .icon { font-size: 20px; display: inline; margin: 0; }
+  .sidebar-nav .nav-btn:hover { background: #f2f2f7; }
+  .sidebar-nav .nav-btn.active { background: #e8f0fe; color: var(--accent); }
+
+  .sidebar-weeks {
+    background: var(--card); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
+    padding: 8px; overflow: hidden;
+  }
+  .sidebar-weeks .week-tab {
+    display: block; width: 100%; margin-bottom: 2px;
+    text-align: left; font-size: 13px; padding: 10px 12px;
+    border: none; box-shadow: none;
+  }
+  .sidebar-weeks .week-tab:hover { background: #f2f2f7; }
+  .sidebar-weeks .week-tab.active { background: var(--accent); }
+
+  .sidebar-filters {
+    background: var(--card); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
+    padding: 8px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .sidebar-filters .filter-chip {
+    display: block; width: 100%; text-align: left;
+    font-size: 13px; padding: 10px 12px; border: none;
+    border-radius: var(--radius-sm);
+  }
+
+  .main-area {
+    flex: 1; min-width: 0; padding-left: 24px;
+    overflow-y: auto; height: calc(100vh - 116px);
+    position: sticky; top: 100px;
+  }
+
+  .main-area .header { display: none; }
+
+  /* 桌面端隐藏移动端元素 */
+  .week-tabs { display: none; }
+  .filter-row { display: none; }
+  .nav { display: none; }
+
+  /* 桌面端 day-card 全宽 */
+  .day-card { margin: 0 0 12px 0; padding: 24px; border-radius: var(--radius-lg); }
+  .day-card:hover { box-shadow: var(--shadow-md); }
+
+  .stats-grid { padding: 0; gap: 12px; }
+  .streak-section { margin: 0 0 12px 0; }
+  .motivation { margin: 0 0 12px 0; }
+  .month-label { padding: 16px 0 6px; }
+}
+
+/* ===== 移动端隐藏桌面元素 ===== */
+@media (max-width: 767px) {
+  .sidebar { display: none; }
+}
 </style>
 </head>
 <body>
@@ -268,20 +353,38 @@ body {
   </div>
 </div>
 
-<!-- Week selector tabs -->
-<div class="week-tabs" id="weekTabs"></div>
-
-<!-- Filter -->
-<div class="filter-row">
-  <span class="filter-chip on" data-track="all" onclick="toggleFilter('all',this)">全部</span>
-  <span class="filter-chip on" data-track="en" onclick="toggleFilter('en',this)">🇬🇧 英语</span>
-  <span class="filter-chip on" data-track="sw" onclick="toggleFilter('sw',this)">💻 软件</span>
-  <span class="filter-chip on" data-track="rs" onclick="toggleFilter('rs',this)">🔬 课题</span>
-  <span class="filter-chip on" data-track="body" onclick="toggleFilter('body',this)">🏃 身体</span>
+<div class="app-layout">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-nav" id="sidebarNav">
+      <div class="nav-btn active" data-tab="plan" onclick="switchTab('plan')">
+        <span class="icon">📋</span><span>每日任务</span>
+      </div>
+      <div class="nav-btn" data-tab="memo" onclick="switchTab('memo')">
+        <span class="icon">📝</span><span>备忘录</span>
+      </div>
+      <div class="nav-btn" data-tab="stats" onclick="switchTab('stats')">
+        <span class="icon">📊</span><span>统计数据</span>
+      </div>
+      <div class="nav-btn" data-tab="review" onclick="switchTab('review')">
+        <span class="icon">🧠</span><span>防摆烂</span>
+      </div>
+    </div>
+    <div class="sidebar-weeks" id="sidebarWeeks"></div>
+    <div class="sidebar-filters" id="sidebarFilters"></div>
+  </div>
+  <div class="main-area" id="mainArea">
+    <!-- 移动端的 week-tabs 和 filter-row 移到这里面 -->
+    <div class="week-tabs" id="weekTabs"></div>
+    <div class="filter-row" id="filterRow">
+      <span class="filter-chip on" data-track="all" onclick="toggleFilter('all',this)">全部</span>
+      <span class="filter-chip on" data-track="en" onclick="toggleFilter('en',this)">🇬🇧 英语</span>
+      <span class="filter-chip on" data-track="sw" onclick="toggleFilter('sw',this)">💻 软件</span>
+      <span class="filter-chip on" data-track="rs" onclick="toggleFilter('rs',this)">🔬 课题</span>
+      <span class="filter-chip on" data-track="body" onclick="toggleFilter('body',this)">🏃 身体</span>
+    </div>
+    <div id="mainContent"></div>
+  </div>
 </div>
-
-<!-- Content -->
-<div id="mainContent"></div>
 
 <!-- Bottom nav -->
 <div class="nav">
