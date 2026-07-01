@@ -329,6 +329,70 @@ body {
 @media (max-width: 767px) {
   .sidebar { display: none; }
 }
+
+/* 备忘录区域 */
+.memo-section {
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+.memo-section-title {
+  font-size: 12px; font-weight: 700; color: var(--accent-purple);
+  margin-bottom: 8px; letter-spacing: 0.5px;
+}
+.memo-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0;
+  animation: memoSlideIn 0.3s ease;
+}
+@keyframes memoSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.memo-item .check {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid #d1d1d6; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.25s cubic-bezier(0.25,0.8,0.25,1.2);
+}
+.memo-item.done .check {
+  background: var(--accent-purple); border-color: var(--accent-purple);
+}
+.memo-item.done .check::after { content: '✓'; font-size: 11px; color: #fff; font-weight: 700; }
+.memo-item .memo-text {
+  flex: 1; font-size: 13px; line-height: 1.5; color: var(--text);
+}
+.memo-item.done .memo-text {
+  color: var(--text-tertiary); text-decoration: line-through;
+}
+.memo-item .memo-delete {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--text-tertiary); cursor: pointer;
+  opacity: 0; transition: opacity 0.2s;
+}
+.memo-item:hover .memo-delete,
+.memo-item .memo-delete:active { opacity: 1; }
+.memo-item .memo-delete:hover { color: var(--danger); background: #fff0f0; }
+
+.memo-add {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 0; font-size: 13px; color: var(--text-tertiary);
+  cursor: pointer; transition: color 0.2s;
+}
+.memo-add:hover { color: var(--accent-purple); }
+.memo-add-icon {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1.5px dashed var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 600;
+}
+.memo-input {
+  flex: 1; font-size: 13px; padding: 6px 10px;
+  border: 2px solid var(--accent-purple); border-radius: var(--radius-sm);
+  outline: none; background: #fff; color: var(--text);
+  font-family: inherit; transition: border-color 0.2s;
+}
+.memo-input:focus { border-color: var(--accent-purple); }
 </style>
 </head>
 <body>
@@ -675,6 +739,53 @@ function editMemo(dateStr, memoId, newText) {
   if (memo) { memo.text = newText.trim(); save(); }
 }
 
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function showMemoInput(addBtn, dateStr) {
+  const memoSection = addBtn.parentElement;
+  const inputDiv = document.createElement('div');
+  inputDiv.className = 'memo-item';
+  inputDiv.innerHTML = `<input class="memo-input" placeholder="输入备忘内容…" autofocus>`;
+  memoSection.insertBefore(inputDiv, addBtn);
+  const input = inputDiv.querySelector('input');
+  input.focus();
+
+  function commit() {
+    const text = input.value;
+    inputDiv.remove();
+    if (text.trim()) {
+      addMemo(dateStr, text);
+      if (state.currentTab === 'plan') renderPlan();
+      else if (state.currentTab === 'memo') renderMemo();
+    }
+  }
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') commit(); });
+  input.addEventListener('blur', commit);
+}
+
+function startEditMemo(dateStr, memoId, textEl) {
+  const currentText = state.memos[dateStr].find(m => m.id === memoId)?.text || '';
+  const input = document.createElement('input');
+  input.className = 'memo-input';
+  input.value = currentText;
+  input.style.flex = '1';
+  textEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function commit() {
+    editMemo(dateStr, memoId, input.value);
+    if (state.currentTab === 'plan') renderPlan();
+    else if (state.currentTab === 'memo') renderMemo();
+  }
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') { input.blur(); } });
+  input.addEventListener('blur', commit);
+}
+
 // ============ HELPERS ============
 function getDateStr(y,m,d){ return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
 function getDayOfWeek(y,m,d){ const dt=new Date(y,m-1,d); return ['日','一','二','三','四','五','六'][dt.getDay()]; }
@@ -784,6 +895,24 @@ function renderPlan(){
     if(tasks.length===0){
       html += `<div style="font-size:12px;color:var(--text-secondary);padding:4px 0">这天暂无安排（休息或补进度）</div>`;
     }
+
+    // 渲染该天的备忘录
+    const memoKey = getDateStr(day.y, day.m, day.d);
+    const dayMemos = state.memos[memoKey] || [];
+    html += `<div class="memo-section">`;
+    html += `<div class="memo-section-title">📝 今日备忘</div>`;
+    dayMemos.forEach(memo => {
+      html += `<div class="memo-item ${memo.done?'done':''}" id="memo-${memo.id}">
+        <div class="check" onclick="event.stopPropagation();toggleMemo('${memoKey}','${memo.id}');renderPlan();updateProgress();"></div>
+        <div class="memo-text" ondblclick="event.stopPropagation();startEditMemo('${memoKey}','${memo.id}',this)">${escapeHtml(memo.text)}</div>
+        <div class="memo-delete" onclick="event.stopPropagation();deleteMemo('${memoKey}','${memo.id}');renderPlan();">×</div>
+      </div>`;
+    });
+    // 添加按钮
+    html += `<div class="memo-add" onclick="event.stopPropagation();showMemoInput(this,'${memoKey}')">
+      <span class="memo-add-icon">+</span> 添加备忘
+    </div>`;
+    html += `</div>`;
 
     html += `</div>`;
   });
