@@ -7,12 +7,16 @@
     "j1b": true,
     "j1c": true,
     "j1g": true,
-    "j3b": false,
+    "j3b": true,
     "j2a": true,
     "j2b": true,
     "j2c": true,
     "j2d": true,
-    "j2e": true
+    "j2e": true,
+    "j3a": true,
+    "j3c": true,
+    "j3e": true,
+    "j3d": true
   },
   "currentTab": "plan",
   "currentWeek": 0,
