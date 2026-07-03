@@ -15,7 +15,7 @@
     "j2e": true,
     "j3a": true,
     "j3c": true,
-    "j3e": true,
+    "j3e": false,
     "j3d": true
   },
   "currentTab": "plan",
@@ -70,6 +70,14 @@
         "text": "取老婆的防晒服快递",
         "done": false,
         "createdAt": "2026-07-03T09:09:38.260Z"
+      }
+    ],
+    "2026-07-04": [
+      {
+        "id": "memo_1783071060654_htffsy",
+        "text": "完成张岩老师必做的大作业 并打印出来",
+        "done": false,
+        "createdAt": "2026-07-03T09:31:00.654Z"
       }
     ]
   }
