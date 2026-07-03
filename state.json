@@ -1,0 +1,22 @@
+{
+  "checks": {
+    "j1a": true,
+    "j1d": true,
+    "j1e": true,
+    "j1b": true,
+    "j6a": true,
+    "j1c": true,
+    "j1g": true,
+    "j1f": true
+  },
+  "currentTab": "plan",
+  "currentWeek": 0,
+  "filters": [
+    "all",
+    "en",
+    "sw",
+    "rs",
+    "body"
+  ],
+  "memos": {}
+}
