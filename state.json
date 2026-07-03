@@ -7,12 +7,16 @@
     "j1b": true,
     "j1c": true,
     "j1g": true,
-    "j3b": false,
+    "j3b": true,
     "j2a": true,
     "j2b": true,
     "j2c": true,
     "j2d": true,
-    "j2e": true
+    "j2e": true,
+    "j3a": true,
+    "j3c": true,
+    "j3e": true,
+    "j3d": true
   },
   "currentTab": "plan",
   "currentWeek": 0,
@@ -58,6 +62,14 @@
         "text": "知行理工申请暑假留宿",
         "done": false,
         "createdAt": "2026-07-02T08:13:28.001Z"
+      }
+    ],
+    "2026-07-03": [
+      {
+        "id": "memo_1783069778260_6jg0ih",
+        "text": "取老婆的防晒服快递",
+        "done": false,
+        "createdAt": "2026-07-03T09:09:38.260Z"
       }
     ]
   }
