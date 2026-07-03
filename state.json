@@ -15,7 +15,7 @@
     "j2e": true,
     "j3a": true,
     "j3c": true,
-    "j3e": false,
+    "j3e": true,
     "j3d": true
   },
   "currentTab": "plan",
