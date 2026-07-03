@@ -397,6 +397,33 @@ body {
 
 .memo-search::placeholder { color: var(--text-tertiary); }
 
+/* Settings panel */
+.settings-panel {
+  padding: 16px 20px;
+  background: var(--card); border-bottom: 1px solid var(--border-light);
+  animation: memeoSlideIn 0.3s ease;
+}
+.settings-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.settings-input {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 13px; font-family: inherit;
+  outline: none; background: var(--bg); color: var(--text);
+}
+.settings-input:focus { border-color: var(--accent); }
+.settings-btn {
+  padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+  background: var(--card); color: var(--text);
+  transition: all 0.2s;
+}
+.settings-btn:hover { background: var(--bg); }
+.settings-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.settings-btn.primary:hover { opacity: 0.9; }
+.sync-status {
+  margin-top: 8px; font-size: 11px; color: var(--text-secondary);
+  padding: 6px 10px; border-radius: var(--radius-sm); background: var(--bg);
+}
+
 </style>
 </head>
 <body>
@@ -407,7 +434,27 @@ body {
       <h1>🎯 江涛·下半年冲刺</h1>
       <div class="date-range">研一暑假 → 研二上学期 · 2026.07-12</div>
     </div>
-    <div style="font-size:28px;" id="moodIcon">🔥</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:20px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" id="syncIcon" onclick="toggleSettings()" title="同步设置">⚙️</span>
+      <div style="font-size:28px;" id="moodIcon">🔥</div>
+    </div>
+  </div>
+  <!-- Settings panel -->
+  <div class="settings-panel" id="settingsPanel" style="display:none;">
+    <div class="settings-title">🔗 GitHub 同步设置</div>
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
+      配置后手机和电脑的任务状态会自动同步
+    </div>
+    <input class="settings-input" type="password" id="ghTokenInput" placeholder="粘贴 GitHub Personal Access Token…">
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="settings-btn primary" onclick="saveToken()">💾 保存</button>
+      <button class="settings-btn" onclick="syncNow()">🔄 立即同步</button>
+    </div>
+    <div class="sync-status" id="syncStatus">未配置</div>
+    <div style="font-size:10px;color:var(--text-tertiary);margin-top:8px;">
+      <a href="https://github.com/settings/tokens" target="_blank" style="color:var(--accent);">获取 Token →</a>
+      需要 <b>Contents</b> 读写权限，仓库: jiangtaoyu753-creator/plan
+    </div>
   </div>
   <div class="progress-mini">
     <span style="font-size:10px;color:var(--text-secondary)">本周</span>
@@ -700,7 +747,119 @@ let rawState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"checks":{},"cu
 if (!rawState.memos) rawState.memos = {};
 let state = rawState;
 
-function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  scheduleSync();
+}
+
+// ============ GITHUB SYNC ============
+const GH_REPO = 'jiangtaoyu753-creator/plan';
+const GH_FILE = 'state.json';
+let syncTimer = null;
+let remoteSha = null;
+
+function getToken(){ return localStorage.getItem('yjt_plan_gh_token') || ''; }
+
+function scheduleSync(){
+  const token = getToken();
+  if(!token) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => pushRemoteState(), 2000);
+}
+
+async function fetchRemoteState(){
+  try {
+    const url = `https://raw.githubusercontent.com/${GH_REPO}/main/${GH_FILE}`;
+    const resp = await fetch(url, { cache: 'no-cache' });
+    if(!resp.ok) return null;
+    const data = await resp.json();
+    return data;
+  } catch(e) { return null; }
+}
+
+async function pushRemoteState(){
+  const token = getToken();
+  if(!token) return;
+  try {
+    const content = JSON.stringify(state, null, 2);
+    const body = {
+      message: 'sync: update state.json',
+      content: btoa(unescape(encodeURIComponent(content)))
+    };
+    // Get latest sha first
+    const apiUrl = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+    const headResp = await fetch(apiUrl, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if(headResp.ok){
+      const headData = await headResp.json();
+      body.sha = headData.sha;
+      // Skip if same sha and content unchanged
+      if(remoteSha === headData.sha) return;
+    }
+    const putResp = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if(putResp.ok){
+      const putData = await putResp.json();
+      remoteSha = putData.content?.sha || null;
+      updateSyncStatus('已同步 ' + new Date().toLocaleTimeString());
+    } else if(putResp.status === 401 || putResp.status === 403){
+      updateSyncStatus('Token 无效');
+    }
+  } catch(e) { updateSyncStatus('网络错误'); }
+}
+
+function syncNow(){
+  const token = getToken();
+  if(!token){ updateSyncStatus('请先配置 Token'); return; }
+  updateSyncStatus('同步中…');
+  pushRemoteState().then(() => {
+    // After push, re-render
+    if(state.currentTab==='plan') renderPlan();
+    else if(state.currentTab==='memo') renderMemo();
+    else if(state.currentTab==='stats') renderStats();
+    else if(state.currentTab==='review') renderReview();
+    updateProgress();
+  });
+}
+
+function updateSyncStatus(msg){
+  const el = document.getElementById('syncStatus');
+  if(el) el.textContent = '🟢 ' + msg;
+  const icon = document.getElementById('syncIcon');
+  if(icon) icon.style.opacity = getToken() ? '1' : '0.5';
+}
+
+function toggleSettings(){
+  const panel = document.getElementById('settingsPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  // Pre-fill token
+  const input = document.getElementById('ghTokenInput');
+  if(input && panel.style.display === 'block'){
+    input.value = getToken();
+    updateSyncStatus(getToken() ? '已配置' : '未配置');
+  }
+}
+
+function saveToken(){
+  const input = document.getElementById('ghTokenInput');
+  const token = input.value.trim();
+  if(token){
+    localStorage.setItem('yjt_plan_gh_token', token);
+    updateSyncStatus('已保存，开始首次同步…');
+    pushRemoteState();
+  } else {
+    localStorage.removeItem('yjt_plan_gh_token');
+    updateSyncStatus('未配置');
+  }
+  document.getElementById('settingsPanel').style.display = 'none';
+}
 
 // 生成唯一 memo ID
 function genMemoId() {
@@ -1377,7 +1536,33 @@ function toggleFilter(track, el){
 }
 
 // Initialize
-function init(){
+async function init(){
+  // Try fetch remote state first
+  const token = getToken();
+  if(token){
+    const remote = await fetchRemoteState();
+    if(remote && remote.checks){
+      // Merge: remote wins, but preserve local memos not in remote
+      const merged = {
+        ...state,
+        checks: remote.checks || state.checks,
+        filters: remote.filters || state.filters,
+        currentWeek: remote.currentWeek != null ? remote.currentWeek : state.currentWeek,
+        currentTab: remote.currentTab || state.currentTab,
+        memos: { ...(remote.memos || {}), ...(state.memos || {}) }
+      };
+      // Remote memos take priority for same keys
+      if(remote.memos){
+        for(const [k, v] of Object.entries(remote.memos)){
+          merged.memos[k] = v;
+        }
+      }
+      state = merged;
+      save();
+      updateSyncStatus('已加载远程数据');
+    }
+  }
+
   // Find current week
   let curWeekIdx = 0;
   weeks.forEach((w,i) => {
@@ -1405,6 +1590,9 @@ function init(){
   renderSidebarFilters();
   // 初始化侧栏导航高亮
   document.querySelectorAll('#sidebarNav .nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === state.currentTab));
+
+  // Update sync icon state
+  updateSyncStatus(getToken() ? '已配置' : '未配置');
 }
 
 init();
