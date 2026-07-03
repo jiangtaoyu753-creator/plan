@@ -1,22 +1,64 @@
 {
   "checks": {
     "j1a": true,
-    "j1d": true,
     "j1e": true,
+    "j1d": true,
+    "j1f": true,
     "j1b": true,
-    "j6a": true,
     "j1c": true,
     "j1g": true,
-    "j1f": true
+    "j3b": false,
+    "j2a": true,
+    "j2b": true,
+    "j2c": true,
+    "j2d": true,
+    "j2e": true
   },
   "currentTab": "plan",
   "currentWeek": 0,
   "filters": [
-    "all",
-    "en",
-    "sw",
-    "rs",
-    "body"
+    "all"
   ],
-  "memos": {}
+  "memos": {
+    "2026-07-02": [
+      {
+        "id": "memo_1782964016709_mtjuiu",
+        "text": "去签走读申请书（院，宿舍）",
+        "done": true,
+        "createdAt": "2026-07-02T03:46:56.709Z"
+      },
+      {
+        "id": "memo_1782964088029_ebigzp",
+        "text": "购买湿巾+",
+        "done": true,
+        "createdAt": "2026-07-02T03:48:08.029Z"
+      },
+      {
+        "id": "memo_1782976612067_cf6gma",
+        "text": "购买洗衣液",
+        "done": true,
+        "createdAt": "2026-07-02T07:16:52.067Z"
+      },
+      {
+        "id": "memo_1782982031398_cfdbt9",
+        "text": "购买洗脸巾",
+        "done": true,
+        "createdAt": "2026-07-02T08:47:11.398Z"
+      },
+      {
+        "id": "memo_1782991254363_zq0auv",
+        "text": "给老婆买防晒服，鸡脚筋",
+        "done": true,
+        "createdAt": "2026-07-02T11:20:54.363Z"
+      }
+    ],
+    "2026-07-06": [
+      {
+        "id": "memo_1782980007999_moe1ub",
+        "text": "知行理工申请暑假留宿",
+        "done": false,
+        "createdAt": "2026-07-02T08:13:28.001Z"
+      }
+    ]
+  }
 }
