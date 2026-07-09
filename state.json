@@ -16,7 +16,9 @@
     "j3a": true,
     "j3c": true,
     "j3e": true,
-    "j3d": true
+    "j3d": true,
+    "j4d": true,
+    "j5b": true
   },
   "currentTab": "plan",
   "currentWeek": 1,
@@ -76,7 +78,7 @@
       {
         "id": "memo_1783071060654_htffsy",
         "text": "完成张岩老师必做的大作业 并打印出来",
-        "done": false,
+        "done": true,
         "createdAt": "2026-07-03T09:31:00.654Z"
       }
     ],
